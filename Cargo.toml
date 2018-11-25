@@ -1,0 +1,7 @@
+[package]
+name = "carballrs"
+version = "0.1.0"
+authors = ["Mark J <ima9rd@gmail.com>"]
+
+[dependencies]
+reqwest = "0.9.5"
