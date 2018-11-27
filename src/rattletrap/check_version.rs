@@ -14,7 +14,7 @@ fn parse_json(s: String) -> Result<serde_json::Value, serde_json::Error> {
     Ok(j)
 }
 
-fn scan_dir(s: &str, files: &mut Vec<String>) {
+pub fn scan_dir(s: &str, files: &mut Vec<String>) {
     let dir: String = s.to_owned() + "*";
     for entry in glob(&dir).unwrap() {
         match entry {
