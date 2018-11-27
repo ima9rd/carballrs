@@ -4,6 +4,7 @@ extern crate serde_json;
 extern crate version_compare;
 use std::collections::HashMap;
 
+use glob::glob;
 mod rattletrap;
 use std::fs::File;
 use std::io::BufReader;
@@ -69,9 +70,21 @@ pub fn json_replay (replay_path: &str)  {
     println!("{:#?}", properties);
 }
 
+fn recursive_glob<'a>(dir_pattern: &str) -> Vec<String> {
+    let mut files: Vec<String> = Vec::new(); 
+    for entry in glob(&dir_pattern).unwrap() {
+        match entry {
+            Ok(path) => {
+                files.push(path.to_str().unwrap().to_owned());
+                }
+            Err(e) => println!("{:?}", e),
+        }
+    }
+    files
+}
 
 fn find_rattletrap_commands() -> HashMap<String, String> {
-    let path_str: &str = "rattletrap\\"; 
+    let path_str: &str = "sr\\rattletrap\\"; 
     let mut files: Vec<String> = Vec::new(); 
     rattletrap::check_version::scan_dir(path_str, &mut files);
     let mut commands: HashMap<String, String> = HashMap::new();
@@ -89,7 +102,20 @@ fn find_rattletrap_commands() -> HashMap<String, String> {
     commands
 }
 
-
+fn generate_protobuf() {
+    // let files: Vec<String> = recursive_glob(&"src\\api\\**\\*.proto");
+    // // let file_ref = for f in files {f.as_ref()};
+    // // println!("{:#?}", files);
+	// protobuf_codegen_pure::run(protobuf_codegen_pure::Args {
+	//     out_dir: "src/protos/",
+	//     input: &["api/game.proto"],
+	//     includes: &["api", "api/metedata"],
+	//     customize: protobuf_codegen_pure::Customize {
+	//       ..Default::default()
+	//     },
+	// }).expect("protoc");
+}
 fn main() {
-    json_replay("replay.replay");
+    generate_protobuf();
+    // json_replay("src\\rattletrap\\replay.replay");
 }
