@@ -39,7 +39,7 @@ pub fn json_replay (replay_path: &str)  {
         .expect("failed to execute process");
     } else if cfg!(target_os = "linux") {
         output = Command::new("sh")
-        .arg(&rattletrap["windows"])
+        .arg(&rattletrap["linux"])
         .arg("--compact")
         .arg("-i")
         .arg(&replay_path_full)
@@ -55,8 +55,6 @@ pub fn json_replay (replay_path: &str)  {
     };
     let json_str: String = format!("{}", String::from_utf8_lossy(&output.stdout));
     let replay: serde_json::Value = serde_json::from_str(json_str.as_str()).unwrap();
-    let file_contents: String = read_file("src\\rattletrap\\replay.json");
-    let replay: serde_json::Value = serde_json::from_str(file_contents.as_str()).unwrap();
     let replay_data = &replay["content"]["body"]["frames"];
     let properties = &replay["header"]["body"]["properties"]["value"];
     let replay_id = &properties["Id"]["value"];
@@ -73,7 +71,7 @@ pub fn json_replay (replay_path: &str)  {
 
 
 fn find_rattletrap_commands() -> HashMap<String, String> {
-    let path_str: &str = "src\\rattletrap\\"; 
+    let path_str: &str = "rattletrap\\"; 
     let mut files: Vec<String> = Vec::new(); 
     rattletrap::check_version::scan_dir(path_str, &mut files);
     let mut commands: HashMap<String, String> = HashMap::new();
@@ -93,5 +91,5 @@ fn find_rattletrap_commands() -> HashMap<String, String> {
 
 
 fn main() {
-    json_replay("src\\rattletrap\\replay.replay");
+    json_replay("replay.replay");
 }
