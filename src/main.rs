@@ -1,15 +1,26 @@
+
+#[macro_use]
+extern crate serde_derive;
+
 extern crate glob;
 extern crate reqwest;
 extern crate serde_json;
+extern crate serde;
 extern crate version_compare;
-use std::collections::HashMap;
+extern crate protoc_rust;
+extern crate protobuf;
 
-use glob::glob;
 mod rattletrap;
+// mod protos;
+
+use std::collections::HashMap;
+use glob::glob;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::process::Command;
+use protoc_rust::Customize;
+use std::path::PathBuf;
 
 
 fn read_file(filepath: &str) -> String {
@@ -28,7 +39,7 @@ fn read_file(filepath: &str) -> String {
 pub fn json_replay (replay_path: &str)  {
     let rattletrap: HashMap<String, String> = find_rattletrap_commands();
     let com_path: String = std::env::current_dir().unwrap().to_str().unwrap().to_owned();
-    let replay_path_full = com_path + "\\" + replay_path;
+    let replay_path_full = com_path + "/" + replay_path;
     println!("{:#?}", replay_path_full);
     let output;
     if cfg!(target_os = "windows") {
@@ -84,7 +95,7 @@ fn recursive_glob<'a>(dir_pattern: &str) -> Vec<String> {
 }
 
 fn find_rattletrap_commands() -> HashMap<String, String> {
-    let path_str: &str = "sr\\rattletrap\\"; 
+    let path_str: &str = "src/rattletrap/"; 
     let mut files: Vec<String> = Vec::new(); 
     rattletrap::check_version::scan_dir(path_str, &mut files);
     let mut commands: HashMap<String, String> = HashMap::new();
@@ -103,19 +114,38 @@ fn find_rattletrap_commands() -> HashMap<String, String> {
 }
 
 fn generate_protobuf() {
-    // let files: Vec<String> = recursive_glob(&"src\\api\\**\\*.proto");
-    // // let file_ref = for f in files {f.as_ref()};
-    // // println!("{:#?}", files);
-	// protobuf_codegen_pure::run(protobuf_codegen_pure::Args {
-	//     out_dir: "src/protos/",
-	//     input: &["api/game.proto"],
-	//     includes: &["api", "api/metedata"],
-	//     customize: protobuf_codegen_pure::Customize {
-	//       ..Default::default()
-	//     },
-	// }).expect("protoc");
+    let files = [
+        "api/game.proto",
+        "api/metadata/camera_settings.proto",
+        "api/metadata/game_metadata.proto",
+        "api/metadata/mutators.proto",
+        "api/metadata/player_loadout.proto",
+        "api/party.proto",
+        "api/player.proto",
+        "api/player_id.proto",
+        "api/stats/ball_stats.proto",
+        "api/stats/data_frame.proto",
+        "api/stats/events.proto",
+        "api/stats/game_stats.proto",
+        "api/stats/player_stats.proto",
+        "api/stats/stats.proto",
+        "api/stats/team_stats.proto",
+        "api/team.proto"
+    ];
+    protoc_rust::run(protoc_rust::Args {
+	    out_dir: "src/protos",
+	    input: &files,
+	    includes: &["."],
+	    customize: Customize {
+            serde_derive: Some(true),
+	        ..Default::default()
+	    },
+	}).expect("protoc");
 }
 fn main() {
-    generate_protobuf();
-    // json_replay("src\\rattletrap\\replay.replay");
+    let proto_dir = std::path::Path::new("src/protos/game.rs");
+    if !proto_dir.exists() {
+        generate_protobuf();
+    };
+    json_replay("src/rattletrap/replay.replay");
 }

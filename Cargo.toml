@@ -10,3 +10,5 @@ serde_derive = "1.0.80"
 serde = "1.0.80"
 glob = "0.2.11"
 version-compare = "0.0.6"
+protoc-rust = { git = "https://github.com/stepancheg/rust-protobuf.git" }
+protobuf = {path = "C:/Users/M-PC/Desktop/rust-protobuf/protobuf", version = "3.0.0"}
